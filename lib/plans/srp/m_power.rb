@@ -2,19 +2,32 @@ module Plans
   module SRP
     class MPower < Base
       include ::SRP::Dates
-      # I _think_ that MPower doesn't assess a separate service charge. I'd like to double check this.
+
+      def plan_code
+        "E-24"
+      end
+
+      def plan_label
+        "M-Power"
+      end
+
       def fixed_charges
-        20.0
+        case (@options && @options[:m_power_tier]) || 1
+        when 1 then 20.0
+        when 2 then 30.0
+        when 3 then 40.0
+        else 20.0
+        end
       end
 
       def rate(date)
         case season(date)
         when :winter
-          0.0976
+          0.1097
         when :summer
-          0.1290
+          0.1204
         when :summer_peak
-          0.1361
+          0.1398
         else
           raise "bad rate"
         end

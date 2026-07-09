@@ -195,8 +195,26 @@ module Plans
       rate(date) * kwh
     end
 
+    def plan_code
+      nil
+    end
+
+    def plan_label
+      self.class.to_s.split("::").last
+    end
+
+    def discontinued?
+      false
+    end
+
     def display_name
-      self.class.to_s.gsub("Plans::", "")
+      if plan_code
+        base_name = "SRP::#{plan_code}/#{plan_label}"
+      else
+        base_name = self.class.to_s.gsub("Plans::", "")
+      end
+
+      discontinued? ? "#{base_name} [DISCONTINUED]" : base_name
     end
 
     def colorize_string(string, code)
@@ -207,7 +225,7 @@ module Plans
     end
 
     def self.print_header
-      puts colorize_string(format("%-30s\t%8s\t%8s\t%8s\t%8s\t%8s\t%6s\t%-8s\t%-8s\t%-8s\t%-8s",
+      puts colorize_string(format("%-45s\t%8s\t%8s\t%8s\t%8s\t%8s\t%6s\t%-8s\t%-8s\t%-8s\t%-8s",
                                   "Plan Name",
                                   "Total",
                                   "Avg/Day",
@@ -220,7 +238,7 @@ module Plans
                                   "Excess (kWh)",
                                   "Demand (kW) avg ± stddev",
                                   "Notes"), 94)
-      puts "-" * 200
+      puts "-" * 240
     end
 
     def extra_notes
@@ -266,7 +284,7 @@ module Plans
         demand_avg = demand_sum / @demands.length.to_f
         demand_stddev = @demands.map { |d| d - demand_avg }.map { |d| d * d }.inject(&:+) / @demands.length.to_f
       end
-      format "%-30s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s",
+      format "%-45s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s",
         display_name,
         format("$%2.2f", total),
         format("$%2.2f", total / (@hours.to_f / 24.0)),

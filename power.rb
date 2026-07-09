@@ -35,6 +35,30 @@ parser = OptionParser.new do |opts|
     options[:offset] = v.to_f
   end
 
+  opts.on("--manage-demand-rate RATE", "Set dollars per kW monthly demand rate for ManageDemand plan (defaults to E-16 PDF values)") do |v|
+    options[:manage_demand_dollar_per_kw] = v.to_f
+  end
+
+  opts.on("--manage-demand-tier TIER", %w(1 2 3), "Select the monthly service charge tier for ManageDemand (1/2/3)") do |v|
+    options[:manage_demand_tier] = v.to_i
+  end
+
+  opts.on("--conserve-tier TIER", %w(1 2 3), "Select the monthly service charge tier for Conserve (1/2/3)") do |v|
+    options[:conserve_tier] = v.to_i
+  end
+
+  opts.on("--basic-tier TIER", %w(1 2 3), "Select the monthly service charge tier for Basic (1/2/3)") do |v|
+    options[:basic_tier] = v.to_i
+  end
+
+  opts.on("--ev-tier TIER", %w(1 2 3), "Select the monthly service charge tier for SRP Electric Vehicle (1/2/3)") do |v|
+    options[:ev_tier] = v.to_i
+  end
+
+  opts.on("--time-of-use-tier TIER", %w(1 2 3), "Select the monthly service charge tier for TimeOfUse (1/2/3)") do |v|
+    options[:time_of_use_tier] = v.to_i
+  end
+
   opts.on("--srp-ez3-start-hour [14,15,16]", %w(14 15 16), "Specify the starting hour as 24h time for SRP's EZ3 plan, for legacy customers.") do |v|
     options[:srp_ez3_start_hour] = v.to_i
   end

@@ -7,12 +7,25 @@ module Plans
         "Only available to customers with a plug-in battery or hybrid vehicle."
       end
 
-      def display_name
-        "SRP/E29 (Electric Vehicle)"
+      def plan_code
+        "E-29"
+      end
+
+      def plan_label
+        "Electric Vehicle"
+      end
+
+      def discontinued?
+        true
       end
 
       def fixed_charges
-        20
+        case (@options && @options[:ev_tier]) || 1
+        when 1 then 20.0
+        when 2 then 30.0
+        when 3 then 40.0
+        else 20.0
+        end
       end
 
       def level(date)
@@ -24,37 +37,27 @@ module Plans
         case season(date)
         when :winter
           case l
-          when :super_off_peak
-            0.0769
-          when :off_peak
-            0.0931
-          when :on_peak
-            0.1145
-          else
-            raise "Bad level"
+          when :super_off_peak then 0.0792
+          when :off_peak then 0.0963
+          when :on_peak then 0.1097
+          else raise "Bad level"
           end
         when :summer
           case l
-          when :super_off_peak
-            0.0787
-          when :off_peak
-            0.0941
-          when :on_peak
-            0.2270
-          else
-            raise "Bad level"
+          when :super_off_peak then 0.0793
+          when :off_peak then 0.0964
+          when :on_peak then 0.2195
+          else raise "Bad level"
           end
         when :summer_peak
           case l
-          when :super_off_peak
-            0.0790
-          when :off_peak
-            0.0946
-          when :on_peak
-            0.2585
-          else
-            raise "Bad level"
+          when :super_off_peak then 0.0794
+          when :off_peak then 0.0965
+          when :on_peak then 0.2604
+          else raise "Bad level"
           end
+        else
+          raise "Bad level"
         end
       end
     end
