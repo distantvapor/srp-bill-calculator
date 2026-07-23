@@ -13,7 +13,7 @@ module Plans
       end
 
       def fixed_charges
-        case (@options && @options[:manage_demand_tier]) || 1
+        case (@options && @options[:tier]) || 1
         when 1 then 20.0
         when 2 then 30.0
         when 3 then 40.0
@@ -22,16 +22,13 @@ module Plans
       end
 
       def level(date)
-        if holiday?(date)
-          return :super_off_peak if (8...15).cover?(date.hour)
-          return :off_peak
-        end
+        # Super off-peak (8am-3pm) applies year-round: weekdays, weekends, and holidays
+        return :super_off_peak if (8...15).cover?(date.hour)
 
-        return :off_peak if weekend?(date)
+        # On-peak (5pm-10pm) is weekdays only, excluding holidays
+        return :off_peak if holiday?(date) || weekend?(date)
 
         case date.hour
-        when 8...15
-          :super_off_peak
         when 17...22
           :on_peak
         else
@@ -44,16 +41,16 @@ module Plans
         case season(date)
         when :summer
           case l
-          when :off_peak then 0.0995
-          when :super_off_peak then 0.0393
-          when :on_peak then 0.1257
+          when :off_peak then 0.0957
+          when :super_off_peak then 0.0355
+          when :on_peak then 0.1219
           else raise "Bad level"
           end
         when :summer_peak
           case l
-          when :off_peak then 0.0996
-          when :super_off_peak then 0.0622
-          when :on_peak then 0.1654
+          when :off_peak then 0.0958
+          when :super_off_peak then 0.0584
+          when :on_peak then 0.1616
           else raise "Bad level"
           end
         when :winter

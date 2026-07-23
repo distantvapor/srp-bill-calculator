@@ -12,7 +12,7 @@ module Plans
       end
 
       def fixed_charges
-        case (@options && @options[:conserve_tier]) || 1
+        case (@options && @options[:tier]) || 1
         when 1 then 20.0
         when 2 then 30.0
         when 3 then 40.0
@@ -21,8 +21,10 @@ module Plans
       end
 
       def level(date)
+        # Super off-peak (8am-3pm) applies year-round including holidays and weekends
         return :super_off_peak if (8...15).cover?(date.hour)
-        return :on_peak if date.wday.between?(1, 5) && (18...21).cover?(date.hour)
+        # On-peak (6pm-9pm) is weekdays only, excluding holidays
+        return :on_peak if !holiday?(date) && date.wday.between?(1, 5) && (18...21).cover?(date.hour)
 
         :off_peak
       end

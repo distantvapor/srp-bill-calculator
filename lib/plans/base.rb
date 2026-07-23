@@ -8,6 +8,10 @@ module Plans
       false
     end
 
+    def self.discontinued?
+      false
+    end
+
     def initialize(logger, demand_schedule, options)
       @logger = logger
       @total = 0
@@ -224,21 +228,15 @@ module Plans
     def notes
     end
 
-    def self.print_header
-      puts colorize_string(format("%-45s\t%8s\t%8s\t%8s\t%8s\t%8s\t%6s\t%-8s\t%-8s\t%-8s\t%-8s",
-                                  "Plan Name",
-                                  "Total",
-                                  "Avg/Day",
-                                  "Energy",
-                                  "Demand",
-                                  "Fees",
-                                  "Usage (kWh)",
-                                  "Gen (kWh)",
-                                  "Gen/Day (kWh)",
-                                  "Excess (kWh)",
-                                  "Demand (kW) avg ± stddev",
-                                  "Notes"), 94)
-      puts "-" * 240
+    def self.print_header(options = {})
+      exclude_solar = options[:exclude_solar_plans]
+      header = format("%-45s	%8s	%8s	%8s	%8s	%8s	%6s", "Plan Name", "Total", "Avg/Day", "Energy", "Demand", "Fees", "Usage (kWh)")
+      header += format("	%-8s	%-8s	%-8s", "Gen (kWh)", "Gen/Day (kWh)", "Excess (kWh)") unless exclude_solar
+      header += format("	%-8s", "Demand (kW) avg ± stddev")
+      puts colorize_string(header, 94)
+      col = 0
+      header.each_char { |ch| ch == "\t" ? (col = (col / 8 + 1) * 8) : (col += 1) }
+      puts "-" * col
     end
 
     def extra_notes
@@ -284,19 +282,24 @@ module Plans
         demand_avg = demand_sum / @demands.length.to_f
         demand_stddev = @demands.map { |d| d - demand_avg }.map { |d| d * d }.inject(&:+) / @demands.length.to_f
       end
-      format "%-45s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s",
+      exclude_solar = @options && @options[:exclude_solar_plans]
+      row = format("%-45s	%8s	%8s	%8s	%8s	%8s	%8s",
         display_name,
         format("$%2.2f", total),
         format("$%2.2f", total / (@hours.to_f / 24.0)),
         format("$%2.2f", usage_total),
         format("$%2.2f", total_demand_charge),
         format("$%2.2f", total_fixed_charges),
-        format("%2.1f", @usage_total),
-        format("%2.1f", @offset_total),
-        format("%2.1f", @offset_total / (@hours.to_f / 24.0)),
-        format("%2.1f", @excess_gen),
-        demand_avg > 0 ? format("%4.1f ± %-4.1f", demand_avg, demand_stddev) : "",
-        colorize_string(notes, 37)
+        format("%2.1f", @usage_total))
+      unless exclude_solar
+        row += format("	%8s	%8s	%8s",
+          format("%2.1f", @offset_total),
+          format("%2.1f", @offset_total / (@hours.to_f / 24.0)),
+          format("%2.1f", @excess_gen))
+      end
+      row += format("	%8s",
+        demand_avg > 0 ? format("%4.1f ± %-4.1f", demand_avg, demand_stddev) : " ")
+      row
     end
   end
 end

@@ -27,7 +27,7 @@ parser = OptionParser.new do |opts|
     options[:provider] = v
   end
 
-  opts.on("-m", "--demand CSV", "Provide an additional demand CSV, available to customers on the SRP E27 plan") do |v|
+  opts.on("-m", "--demand CSV", "Provide an additional demand CSV, for customers on the SRP E-27 or E-16 plans") do |v|
     options[:demand_schedule] = v
   end
 
@@ -39,26 +39,9 @@ parser = OptionParser.new do |opts|
     options[:manage_demand_dollar_per_kw] = v.to_f
   end
 
-  opts.on("--manage-demand-tier TIER", %w(1 2 3), "Select the monthly service charge tier for ManageDemand (1/2/3)") do |v|
-    options[:manage_demand_tier] = v.to_i
+  opts.on("--tier TIER", %w(1 2 3), "Select the monthly service charge tier (1/2/3), applies to all plans") do |v|
+    options[:tier] = v.to_i
   end
-
-  opts.on("--conserve-tier TIER", %w(1 2 3), "Select the monthly service charge tier for Conserve (1/2/3)") do |v|
-    options[:conserve_tier] = v.to_i
-  end
-
-  opts.on("--basic-tier TIER", %w(1 2 3), "Select the monthly service charge tier for Basic (1/2/3)") do |v|
-    options[:basic_tier] = v.to_i
-  end
-
-  opts.on("--ev-tier TIER", %w(1 2 3), "Select the monthly service charge tier for SRP Electric Vehicle (1/2/3)") do |v|
-    options[:ev_tier] = v.to_i
-  end
-
-  opts.on("--time-of-use-tier TIER", %w(1 2 3), "Select the monthly service charge tier for TimeOfUse (1/2/3)") do |v|
-    options[:time_of_use_tier] = v.to_i
-  end
-
   opts.on("--srp-ez3-start-hour [14,15,16]", %w(14 15 16), "Specify the starting hour as 24h time for SRP's EZ3 plan, for legacy customers.") do |v|
     options[:srp_ez3_start_hour] = v.to_i
   end
@@ -89,6 +72,10 @@ parser = OptionParser.new do |opts|
 
   opts.on("--exclude-solar-plans", "Exclude Solar Plans") do |v|
     options[:exclude_solar_plans] = true
+  end
+
+  opts.on("--exclude-discontinued", "Exclude discontinued plans") do
+    options[:exclude_discontinued] = true
   end
 end
 
@@ -133,7 +120,10 @@ if options[:demand_schedule]
   end
 end
 
-applicable_plans = root::PLANS.reject{|c| c.solar_eligible if options[:exclude_solar_plans]}
+applicable_plans = root::PLANS.reject do |c|
+  (options[:exclude_solar_plans] && c.solar_eligible) ||
+  (options[:exclude_discontinued] && c.discontinued?)
+end
 
 plans = applicable_plans.select { |c| !options[:offset] || c.solar_eligible }.map { |c| c.new(logger, demand_schedule, options) }
 
@@ -164,7 +154,7 @@ the relative cost of the programs.
 
 EOF
 
-Plans::Base.print_header
+Plans::Base.print_header(options)
 puts colorize_string best, 32
 sorted.each do |plan|
   puts colorize_string plan, 33

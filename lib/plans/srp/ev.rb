@@ -15,12 +15,16 @@ module Plans
         "Electric Vehicle"
       end
 
+      def self.discontinued?
+        true
+      end
+
       def discontinued?
         true
       end
 
       def fixed_charges
-        case (@options && @options[:ev_tier]) || 1
+        case (@options && @options[:tier]) || 1
         when 1 then 20.0
         when 2 then 30.0
         when 3 then 40.0

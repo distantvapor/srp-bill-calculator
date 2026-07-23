@@ -11,8 +11,16 @@ module Plans
         "TimeOfUse"
       end
 
+      def self.discontinued?
+        true
+      end
+
+      def discontinued?
+        true
+      end
+
       def fixed_charges
-        case (@options && @options[:time_of_use_tier]) || 1
+        case (@options && @options[:tier]) || 1
         when 1 then 20.0
         when 2 then 30.0
         when 3 then 40.0
@@ -22,6 +30,7 @@ module Plans
 
       def level(date)
         return :off_peak if holiday?(date)
+        return :off_peak if weekend?(date)
 
         case season(date)
         when :winter

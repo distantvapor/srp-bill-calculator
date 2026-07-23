@@ -103,13 +103,15 @@ module SRP
     end
 
     def super_offpeak_level(date)
+      # Super off-peak (11pm-5am) applies year-round including holidays and weekends
+      return :super_off_peak if (0...5).cover?(date.hour) || date.hour == 23
+
+      # On-peak does NOT apply on holidays
       return :off_peak if holiday?(date)
 
       case season(date)
       when :winter
         case date.hour
-        when 0...5, 23..24
-          :super_off_peak
         when 5...9, 17...21
           weekend?(date) ? :off_peak : :on_peak
         else
@@ -117,8 +119,6 @@ module SRP
         end
       else
         case date.hour
-        when 0...5, 23..24
-          :super_off_peak
         when 14...20
           weekend?(date) ? :off_peak : :on_peak
         else
