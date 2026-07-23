@@ -2,7 +2,7 @@
 
 This is a tool to estimate what your power costs would be on an hour-by-hour basis, for each of SRP and APS's different plans. I wrote it to determine which of SRP's plans would be least expensive for my family.
 
-![](doc/Screenshot_20180630_085837.png)
+<img width="1195" height="207" alt="image" src="https://github.com/user-attachments/assets/2c4c8aaa-07b9-47a9-8a07-18aac075d560" />
 
 ## Usage
 
